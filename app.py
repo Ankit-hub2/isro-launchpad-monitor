@@ -23,16 +23,32 @@ model, feature_cols = load_isro_system()
 # === ISRO OFFICIAL HEADER - MATCHING WEBSITE STYLE ===
 st.markdown("""
 <style>
+/* Mobile Responsive Reset */
+@media (max-width: 768px) {
+    .main .block-container {
+        padding: 1rem 0.5rem !important;
+        max-width: 100% !important;
+    }
+}
+
 /* ISRO Official Blue Header */
 .isro-top-bar {
     background: linear-gradient(90deg, #003d82 0%, #004d9f 100%);
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 1rem;
     margin: -5rem -5rem 0 -5rem;
     color: white;
     font-size: 0.85rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+@media (max-width: 768px) {
+    .isro-top-bar {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.5rem;
+        margin: -3rem -1rem 0 -1rem;
+    }
 }
 
 .isro-main-header {
@@ -43,10 +59,26 @@ st.markdown("""
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+@media (max-width: 768px) {
+    .isro-main-header {
+        padding: 1rem 0.5rem;
+        margin: 0 -1rem 1rem -1rem;
+        border-bottom: 2px solid #ff9933;
+    }
+}
+
 .isro-logo-section {
     display: flex;
     align-items: center;
     gap: 2rem;
+}
+
+@media (max-width: 768px) {
+    .isro-logo-section {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 }
 
 .isro-logo {
@@ -54,6 +86,13 @@ st.markdown("""
     height: 80px;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23003d82"/><polygon points="50,15 35,70 50,60 65,70" fill="%23ff9933"/><circle cx="50" cy="30" r="8" fill="white"/></svg>');
     background-size: contain;
+}
+
+@media (max-width: 768px) {
+    .isro-logo {
+        width: 50px;
+        height: 50px;
+    }
 }
 
 .isro-title-section {
@@ -68,12 +107,27 @@ st.markdown("""
     letter-spacing: 0.5px;
 }
 
+@media (max-width: 768px) {
+    .isro-org-name-hindi {
+        font-size: 0.85rem;
+        text-align: center;
+    }
+}
+
 .isro-org-name-english {
     font-size: 1.8rem;
     color: #003d82;
     font-weight: 700;
     margin: 0.3rem 0;
     letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+    .isro-org-name-english {
+        font-size: 1.1rem;
+        text-align: center;
+        margin: 0.2rem 0;
+    }
 }
 
 .isro-org-subtitle {
@@ -83,11 +137,25 @@ st.markdown("""
     margin: 0;
 }
 
+@media (max-width: 768px) {
+    .isro-org-subtitle {
+        font-size: 0.75rem;
+        text-align: center;
+    }
+}
+
 .isro-emblem {
     width: 60px;
     height: 70px;
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><circle cx="50" cy="40" r="35" fill="%23138808"/><rect x="35" y="70" width="30" height="45" fill="%23ff9933"/></svg>');
     background-size: contain;
+}
+
+@media (max-width: 768px) {
+    .isro-emblem {
+        width: 40px;
+        height: 50px;
+    }
 }
 
 /* Navigation Bar - ISRO Style */
@@ -97,6 +165,15 @@ st.markdown("""
     margin: -1rem -5rem 2rem -5rem;
     display: flex;
     gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .isro-nav {
+        margin: -1rem -1rem 1rem -1rem;
+        flex-wrap: nowrap;
+    }
 }
 
 .isro-nav-item {
@@ -107,6 +184,14 @@ st.markdown("""
     font-size: 0.95rem;
     border-right: 1px solid rgba(255,255,255,0.1);
     transition: all 0.3s;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .isro-nav-item {
+        padding: 0.8rem 1rem;
+        font-size: 0.85rem;
+    }
 }
 
 .isro-nav-item:hover {
@@ -127,6 +212,14 @@ st.markdown("""
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
+@media (max-width: 768px) {
+    .isro-card {
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-radius: 6px;
+    }
+}
+
 .isro-card-header {
     color: #003d82;
     font-size: 1.3rem;
@@ -136,6 +229,13 @@ st.markdown("""
     border-bottom: 2px solid #ff9933;
 }
 
+@media (max-width: 768px) {
+    .isro-card-header {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+    }
+}
+
 /* Status Indicators */
 .status-box {
     padding: 1rem;
@@ -143,6 +243,16 @@ st.markdown("""
     text-align: center;
     font-weight: 600;
     margin: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+    .status-box {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+    }
+    .status-box div {
+        font-size: inherit !important;
+    }
 }
 
 .status-critical {
@@ -172,11 +282,26 @@ st.markdown("""
     text-align: center;
 }
 
+@media (max-width: 768px) {
+    .isro-footer {
+        padding: 1.5rem 1rem;
+        margin: 2rem -1rem -3rem -1rem;
+        font-size: 0.85rem;
+    }
+}
+
 /* Tricolor Accent */
 .tricolor-bar {
     height: 4px;
     background: linear-gradient(90deg, #ff9933 0%, #ffffff 33%, #138808 66%, #138808 100%);
     margin: 0 -5rem;
+}
+
+@media (max-width: 768px) {
+    .tricolor-bar {
+        margin: 0 -1rem;
+        height: 3px;
+    }
 }
 
 /* Buttons */
@@ -189,9 +314,71 @@ st.markdown("""
     border-radius: 4px !important;
 }
 
+@media (max-width: 768px) {
+    .stButton > button {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+        width: 100% !important;
+    }
+}
+
 .stButton > button:hover {
     background: #004d9f !important;
     box-shadow: 0 4px 12px rgba(0,61,130,0.3) !important;
+}
+
+/* Streamlit Metric Cards - Mobile Responsive */
+@media (max-width: 768px) {
+    [data-testid="stMetric"] {
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 6px;
+        border-left: 3px solid #ff9933;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.75rem !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 1.1rem !important;
+    }
+}
+
+/* Tables - Mobile Responsive */
+@media (max-width: 768px) {
+    .stDataFrame {
+        font-size: 0.8rem;
+    }
+    [data-testid="stDataFrame"] {
+        overflow-x: auto;
+    }
+}
+
+/* Input Fields - Mobile Responsive */
+@media (max-width: 768px) {
+    .stNumberInput input,
+    .stSlider {
+        font-size: 0.9rem;
+    }
+    .stNumberInput label,
+    .stSlider label {
+        font-size: 0.85rem;
+    }
+}
+
+/* File Uploader - Mobile Responsive */
+@media (max-width: 768px) {
+    [data-testid="stFileUploader"] {
+        font-size: 0.85rem;
+    }
+}
+
+/* Columns - Stack on Mobile */
+@media (max-width: 768px) {
+    [data-testid="column"] {
+        width: 100% !important;
+        flex: 100% !important;
+        margin-bottom: 1rem;
+    }
 }
 </style>
 
@@ -234,6 +421,14 @@ st.markdown("""
     <a href='#' style='color: #003d82; text-decoration: none;'>SDSC SHAR</a> / 
     <span style='color: #666;'>Launch Pad Health Monitoring System</span>
 </div>
+<style>
+@media (max-width: 768px) {
+    div[style*='padding: 1rem 0'] {
+        font-size: 0.75rem !important;
+        padding: 0.5rem 0 !important;
+    }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # === PAGE TITLE ===
@@ -246,6 +441,16 @@ st.markdown("""
         Satish Dhawan Space Centre SHAR, Sriharikota • Real-time Predictive Maintenance Platform
     </p>
 </div>
+<style>
+@media (max-width: 768px) {
+    .isro-card h1 {
+        font-size: 1.3rem !important;
+    }
+    .isro-card p {
+        font-size: 0.85rem !important;
+    }
+}
+</style>
 """, unsafe_allow_html=True)
 
 # === MISSION STATUS SECTION ===
@@ -300,16 +505,26 @@ with sensor_row1:
         vib_z = st.number_input("vz", 0.0, 4.0, 0.61, 0.01, label_visibility="collapsed")
     
     st.markdown("**Secondary Monitoring Systems**")
-    p1, p2, p3 = st.columns(3)
-    with p1:
+    
+    # Mobile-friendly: Stack these on small screens
+    if st.session_state.get('mobile_view', False):
         st.markdown("<small>Hydraulic Pressure (bar)</small>", unsafe_allow_html=True)
         pressure = st.number_input("pr", 120.0, 260.0, 202.0, 1.0, label_visibility="collapsed")
-    with p2:
         st.markdown("<small>Structural Strain (µε)</small>", unsafe_allow_html=True)
         strain = st.number_input("st", 40.0, 450.0, 88.0, 2.0, label_visibility="collapsed")
-    with p3:
         st.markdown("<small>Component Health Index</small>", unsafe_allow_html=True)
         health = st.slider("hl", 0.75, 1.00, 0.982, 0.005, label_visibility="collapsed")
+    else:
+        p1, p2, p3 = st.columns(3)
+        with p1:
+            st.markdown("<small>Hydraulic Pressure (bar)</small>", unsafe_allow_html=True)
+            pressure = st.number_input("pr", 120.0, 260.0, 202.0, 1.0, label_visibility="collapsed")
+        with p2:
+            st.markdown("<small>Structural Strain (µε)</small>", unsafe_allow_html=True)
+            strain = st.number_input("st", 40.0, 450.0, 88.0, 2.0, label_visibility="collapsed")
+        with p3:
+            st.markdown("<small>Component Health Index</small>", unsafe_allow_html=True)
+            health = st.slider("hl", 0.75, 1.00, 0.982, 0.005, label_visibility="collapsed")
 
 with risk_panel:
     st.markdown("**Risk Management Analysis**")
@@ -514,4 +729,17 @@ st.markdown("""
         © 2026 ISRO • Terms of Use • Privacy Policy • Hyperlinking Policy • Accessibility Statement
     </div>
 </div>
+<style>
+@media (max-width: 768px) {
+    .isro-footer div:first-child {
+        font-size: 1rem !important;
+    }
+    .isro-footer div:nth-child(2) {
+        font-size: 0.8rem !important;
+    }
+    .isro-footer div:last-child {
+        font-size: 0.7rem !important;
+    }
+}
+</style>
 """, unsafe_allow_html=True)
