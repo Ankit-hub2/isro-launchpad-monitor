@@ -514,4 +514,4 @@ st.markdown("""
         © 2026 ISRO • Terms of Use • Privacy Policy • Hyperlinking Policy • Accessibility Statement
     </div>
 </div>
-""", unsafe_allow_html=True)    backgr
+""", unsafe_allow_html=True)
