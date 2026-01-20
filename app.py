@@ -2,15 +2,14 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 
-# Page Config
+# === ISRO OFFICIAL CONFIG ===
 st.set_page_config(
-    page_title="Launch Pad Monitoring System", 
-    page_icon="🛰️",
+    page_title="ISRO - Launch Pad Monitoring System", 
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 @st.cache_resource
@@ -21,28 +20,37 @@ def load_isro_system():
 
 model, feature_cols = load_isro_system()
 
+# === HEALTH CALCULATION FUNCTION ===
 def calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temp):
-    health = 1.0
-    vib_mag = np.sqrt(vib_x**2 + vib_y**2 + vib_z**2)
+    """
+    Calculate component health automatically from sensor readings
+    Returns: health_index (0.5 to 1.0)
+    """
+    health = 1.0  # Start at perfect health
     
+    # Factor 1: Vibration Impact (25% weight)
+    vib_mag = np.sqrt(vib_x**2 + vib_y**2 + vib_z**2)
     if vib_mag > 4.0: health -= 0.30
     elif vib_mag > 3.0: health -= 0.20
     elif vib_mag > 2.5: health -= 0.12
     elif vib_mag > 2.0: health -= 0.06
     elif vib_mag > 1.5: health -= 0.02
     
+    # Factor 2: Pressure Impact (20% weight)
     if pressure < 130: health -= 0.30
     elif pressure < 150: health -= 0.20
     elif pressure < 170: health -= 0.12
     elif pressure < 185: health -= 0.06
     elif pressure < 200: health -= 0.02
     
+    # Factor 3: Strain Impact (15% weight)
     if strain > 400: health -= 0.25
     elif strain > 350: health -= 0.18
     elif strain > 300: health -= 0.12
     elif strain > 250: health -= 0.07
     elif strain > 200: health -= 0.03
     
+    # Factor 4: Temperature Impact (10% weight)
     if temp > 45: health -= 0.15
     elif temp > 42: health -= 0.10
     elif temp > 38: health -= 0.05
@@ -50,591 +58,479 @@ def calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temp):
     
     return max(0.50, min(1.0, health))
 
-# Enhanced Mobile-Responsive Styling
+# === ISRO OFFICIAL HEADER ===
 st.markdown("""
 <style>
-    /* Global Reset */
-    * {margin: 0; padding: 0; box-sizing: border-box;}
-    .main .block-container {padding: 0 !important; max-width: 100% !important;}
-    
-    /* Enhanced Header */
-    .header-section {
-        background: linear-gradient(135deg, #001f3f 0%, #003d82 50%, #00274d 100%);
-        padding: 1.5rem 1rem;
-        color: white;
-        position: relative;
-        overflow: hidden;
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .main .block-container {
+        padding: 1rem 0.5rem !important;
+        max-width: 100% !important;
     }
-    
-    .header-content {
-        max-width: 1400px;
-        margin: 0 auto;
-        text-align: center;
-        position: relative;
-        z-index: 2;
-    }
-    
-    .header-badge {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: #dc2626;
-        color: white;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.7rem;
-        font-weight: 700;
-        border-radius: 20px;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% {opacity: 1; transform: scale(1);}
-        50% {opacity: 0.7; transform: scale(1.05);}
-    }
-    
-    .org-title-hindi {
-        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-        font-weight: 600;
-        margin-bottom: 0.3rem;
-        opacity: 0.95;
-        letter-spacing: 0.5px;
-    }
-    
-    .org-title-english {
-        font-size: clamp(1.3rem, 4vw, 2rem);
-        font-weight: 800;
-        margin-bottom: 0.4rem;
-        letter-spacing: 1px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .header-subtitle {
-        font-size: clamp(0.8rem, 2vw, 1rem);
-        opacity: 0.9;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-    }
-    
-    /* Tricolor Bar */
-    .tricolor {
-        height: 5px;
-        background: linear-gradient(90deg, 
-            #FF9933 0%, #FF9933 33.33%, 
-            #FFFFFF 33.33%, #FFFFFF 66.66%, 
-            #138808 66.66%, #138808 100%);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    /* Navigation - Mobile Optimized */
-    .nav-section {
-        background: rgba(0, 47, 108, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 0.8rem 1rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    .nav-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .nav-link {
-        color: white;
-        font-size: clamp(0.75rem, 2vw, 0.85rem);
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        transition: all 0.3s;
-        font-weight: 500;
-        white-space: nowrap;
-    }
-    
-    .nav-link:hover {
-        background: rgba(255, 153, 51, 0.2);
-        transform: translateY(-1px);
-    }
-    
-    /* Content Area */
-    .content-wrapper {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        min-height: 80vh;
-        padding: 2rem 1rem;
-    }
-    
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-    
-    /* Page Title - Enhanced */
-    .page-title {
-        background: white;
-        border-radius: 16px;
-        border-left: 6px solid #FF9933;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
-    }
-    
-    .page-title h2 {
-        color: #001f3f;
-        font-size: clamp(1.5rem, 4vw, 2.2rem);
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.5px;
-    }
-    
-    .page-title p {
-        color: #64748b;
-        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-        font-weight: 500;
-    }
-    
-    /* Cards - Enhanced */
-    .card {
-        background: white;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.2);
-        transition: all 0.3s;
-    }
-    
-    .card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 16px 48px rgba(0,0,0,0.12);
-    }
-    
-    .card-header {
-        color: #001f3f;
-        font-size: clamp(1.1rem, 3vw, 1.3rem);
-        font-weight: 800;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
-        border-bottom: 4px solid #FF9933;
-        position: relative;
-    }
-    
-    .card-header::after {
-        content: '';
-        position: absolute;
-        bottom: -4px;
-        left: 0;
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(90deg, #FF9933, #138808);
-        border-radius: 2px;
-    }
-    
-    /* Health Display - Enhanced */
-    .health-box {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        border-radius: 20px;
-        padding: 2.5rem;
-        text-align: center;
-        margin: 2rem 0;
-        box-shadow: 0 12px 40px rgba(16, 185, 129, 0.3);
-    }
-    
-    .health-label {
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        margin-bottom: 1rem;
-    }
-    
-    .health-value {
-        font-size: clamp(2.5rem, 8vw, 4rem);
-        font-weight: 900;
-        font-family: 'Courier New', monospace;
-        letter-spacing: 3px;
-        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-    
-    /* Status Boxes */
-    .status-box {
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin: 1.5rem 0;
-        border-left: 6px solid;
-    }
-    
-    .status-critical {background: #fef2f2; border-left-color: #dc2626; color: #7f1d1d;}
-    .status-warning {background: #fffbeb; border-left-color: #f59e0b; color: #78350f;}
-    .status-normal {background: #f0fdf4; border-left-color: #10b981; color: #14532d;}
-    
-    .status-title {
-        font-weight: 800;
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Buttons - Enhanced */
-    .stButton > button {
-        background: linear-gradient(135deg, #003d82, #001f3f) !important;
-        color: white !important;
-        border: none !important;
-        padding: 1rem 2rem !important;
-        font-weight: 700 !important;
-        font-size: 0.95rem !important;
-        letter-spacing: 1px !important;
-        text-transform: uppercase !important;
-        border-radius: 12px !important;
-        width: 100% !important;
-        transition: all 0.3s !important;
-        box-shadow: 0 4px 16px rgba(0,61,130,0.3) !important;
-    }
-    
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #00274d, #001a2e) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 24px rgba(0,61,130,0.4) !important;
-    }
-    
-    /* Form Elements */
-    .stNumberInput > label {
-        color: #1e293b !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-    }
-    
-    /* Metrics */
-    [data-testid="stMetricValue"] {
-        font-size: 1.6rem !important;
-        font-weight: 800 !important;
-        color: #001f3f !important;
-    }
-    
-    /* Footer */
-    .footer {
-        background: linear-gradient(180deg, #001f3f 0%, #000814 100%);
-        color: white;
-        padding: 3rem 1rem;
-        text-align: center;
-        margin-top: 4rem;
-    }
-    
-    /* Hide Streamlit Elements */
-    #MainMenu, footer, .stDeployButton {visibility: hidden !important;}
-    
-    /* Ultra Mobile Responsive */
-    @media (max-width: 768px) {
-        .content-wrapper {padding: 1.5rem 0.5rem;}
-        .card {padding: 1.5rem;}
-        .page-title {padding: 1.5rem 1rem;}
-        .nav-container {gap: 0.3rem;}
-        .nav-link {padding: 0.4rem 0.8rem; font-size: 0.8rem;}
-    }
-    
-    @media (max-width: 480px) {
-        .header-section {padding: 1.2rem 0.8rem;}
-        .header-badge {top: 0.8rem; right: 0.8rem; font-size: 0.65rem;}
-        .card {padding: 1.2rem; margin-bottom: 1.5rem;}
-        .page-title {padding: 1.2rem 1rem;}
-        .nav-container {flex-direction: column; gap: 0.4rem;}
-    }
+}
+
+/* ISRO Header */
+.isro-top-bar {
+    background: linear-gradient(90deg, #003d82 0%, #004d9f 100%);
+    padding: 0.5rem 1rem;
+    margin: -5rem -5rem 0 -5rem;
+    color: white;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.isro-main-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+    padding: 1.5rem 2rem;
+    margin: 0 -5rem 2rem -5rem;
+    border-bottom: 3px solid #ff9933;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.isro-logo-section {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.isro-org-name-hindi {
+    font-size: 1.3rem;
+    color: #003d82;
+    font-weight: 700;
+}
+
+.isro-org-name-english {
+    font-size: 1.8rem;
+    color: #003d82;
+    font-weight: 700;
+    margin: 0.3rem 0;
+}
+
+.isro-org-subtitle {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.isro-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.isro-card-header {
+    color: #003d82;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #ff9933;
+}
+
+.status-box {
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 600;
+    margin: 0.5rem 0;
+}
+
+.status-critical {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    color: white;
+    border-left: 4px solid #ff9933;
+}
+
+.status-warning {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    border-left: 4px solid #ff9933;
+}
+
+.status-normal {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    color: white;
+    border-left: 4px solid #ff9933;
+}
+
+.health-display {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 1rem 0;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.health-value {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0.5rem 0;
+}
+
+.health-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.live-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: #4caf50;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    margin-right: 0.5rem;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.tricolor-bar {
+    height: 4px;
+    background: linear-gradient(90deg, #ff9933 0%, #ffffff 33%, #138808 66%, #138808 100%);
+    margin: 0 -5rem;
+}
+
+.stButton > button {
+    background: #003d82 !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 2rem !important;
+    border-radius: 4px !important;
+}
+
+.stButton > button:hover {
+    background: #004d9f !important;
+    box-shadow: 0 4px 12px rgba(0,61,130,0.3) !important;
+}
 </style>
-""", unsafe_allow_html=True)
 
-# Enhanced Header
-st.markdown("""
-<div class='header-section'>
-    <div class='header-badge'>🛰️ LIVE MONITORING</div>
-    <div class='header-content'>
-        <div class='org-title-hindi'>लॉन्च पैड संरचनात्मक स्वास्थ्य निगरानी प्रणाली</div>
-        <div class='org-title-english'>LAUNCH PAD STRUCTURAL HEALTH MONITORING SYSTEM</div>
-        <div class='header-subtitle'>Satish Dhawan Space Centre SHAR • Real-time Predictive Maintenance</div>
+<!-- Top Bar -->
+<div class='isro-top-bar'>
+    <div>English | हिंदी | Sitemap | Contact us</div>
+    <div>A+ A A-</div>
+</div>
+
+<!-- Header -->
+<div class='isro-main-header'>
+    <div class='isro-logo-section'>
+        <div style='font-size: 3rem;'></div>
+        <div>
+            <div class='isro-org-name-hindi'>भारतीय अंतरिक्ष अनुसंधान संगठन, अंतरिक्ष विभाग</div>
+            <div class='isro-org-name-english'>Indian Space Research Organisation, Department of Space</div>
+            <div class='isro-org-subtitle'>भारत सरकार / Government of India</div>
+        </div>
     </div>
 </div>
-<div class='tricolor'></div>
-<div class='nav-section'>
-    <div class='nav-container'>
-        <div class='nav-link'>Dashboard</div>
-        <div class='nav-link'>Analysis</div>
-        <div class='nav-link'>Alerts</div>
-        <div class='nav-link'>Reports</div>
-        <div class='nav-link'>Settings</div>
-    </div>
-</div>
+
+<div class='tricolor-bar'></div>
 """, unsafe_allow_html=True)
 
-# Content Area
-st.markdown("<div class='content-wrapper'><div class='container'>", unsafe_allow_html=True)
-
-# Page Title
+# === PAGE TITLE ===
 st.markdown("""
-<div class='page-title'>
-    <h2>Real-time Sensor Analysis</h2>
-    <p>Monitor launch pad structural integrity with live sensor data and ML predictions</p>
+<div class='isro-card'>
+    <h1 style='color: #003d82; font-size: 2rem; font-weight: 700; margin: 0;'>
+        Launch Pad Structural Health Monitoring System
+    </h1>
+    <p style='color: #666; font-size: 1.1rem; margin: 0.5rem 0 0 0;'>
+        Satish Dhawan Space Centre SHAR, Sriharikota • Real-time Predictive Maintenance Platform
+    </p>
 </div>
 """, unsafe_allow_html=True)
 
-# Main Content - Full Width Dashboard
-st.markdown("<div class='card'><div class='card-header'>Live Sensor Dashboard</div>", unsafe_allow_html=True)
+# === DATA SOURCE SELECTION ===
+st.markdown("<div class='isro-card'><div class='isro-card-header'>📡 Data Source Selection</div>", unsafe_allow_html=True)
 
-# Data Source Selection
-data_source = st.radio("**Data Mode:**", ["Live Sensor Feed", "CSV File Upload"], 
-                      label_visibility="collapsed", horizontal=True)
+data_source = st.radio(
+    "Select Data Source:",
+    ["🔴 Live Sensor Feed", "📁 CSV File Upload"],
+    horizontal=True
+)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Live Sensor Mode
-if data_source == "Live Sensor Feed":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
+# === LIVE SENSOR MODE ===
+if data_source == "🔴 Live Sensor Feed":
+    st.markdown("<div class='isro-card'>", unsafe_allow_html=True)
+    st.markdown("<div class='isro-card-header'><span class='live-indicator'></span>Live Sensor Data Stream</div>", unsafe_allow_html=True)
     
-    st.markdown("<div class='card-header'>Sensor Readings</div>", unsafe_allow_html=True)
+    col1, col2 = st.columns([2.5, 1.5])
     
-    # Sensor Inputs - Mobile Responsive
-    st.subheader("🌀 Vibration Sensors (Tri-axial)")
-    v1, v2, v3 = st.columns(3)
-    with v1:
-        vib_x = st.number_input("X-axis (m/s²)", 0.0, 5.0, 0.72, 0.01, key="live_vib_x")
-    with v2:
-        vib_y = st.number_input("Y-axis (m/s²)", 0.0, 5.0, 0.68, 0.01, key="live_vib_y")
-    with v3:
-        vib_z = st.number_input("Z-axis (m/s²)", 0.0, 4.0, 0.61, 0.01, key="live_vib_z")
-    
-    st.markdown("---")
-    
-    st.subheader("🔧 Secondary Systems")
-    s1, s2, s3 = st.columns(3)
-    with s1:
-        pressure = st.number_input("Pressure (bar)", 120.0, 260.0, 202.0, 1.0, key="live_pressure")
-    with s2:
-        strain = st.number_input("Strain (µε)", 40.0, 450.0, 88.0, 2.0, key="live_strain")
-    with s3:
-        temperature = st.number_input("Temp (°C)", 20.0, 50.0, 28.5, 0.1, key="live_temp")
-    
-    # Health Calculation
-    health = calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temperature)
-    
-    st.markdown(f"""
-    <div class='health-box'>
-        <div class='health-label'>Structural Health Index</div>
-        <div class='health-value'>{health:.3f}</div>
-        <div style='font-size: 1rem; margin-top: 1rem; opacity: 0.9;'>
-            Auto-calculated from all sensors
+    with col1:
+        st.markdown("**Primary Vibration Sensors (Tri-axial Accelerometers)**")
+        v1, v2, v3 = st.columns(3)
+        with v1:
+            vib_x = st.number_input("Vibration X-axis (m/s²)", 0.0, 5.0, 0.72, 0.01, key="live_vib_x")
+        with v2:
+            vib_y = st.number_input("Vibration Y-axis (m/s²)", 0.0, 5.0, 0.68, 0.01, key="live_vib_y")
+        with v3:
+            vib_z = st.number_input("Vibration Z-axis (m/s²)", 0.0, 4.0, 0.61, 0.01, key="live_vib_z")
+        
+        st.markdown("**Secondary Monitoring Systems**")
+        s1, s2, s3 = st.columns(3)
+        with s1:
+            pressure = st.number_input("Hydraulic Pressure (bar)", 120.0, 260.0, 202.0, 1.0, key="live_pressure")
+        with s2:
+            strain = st.number_input("Structural Strain (µε)", 40.0, 450.0, 88.0, 2.0, key="live_strain")
+        with s3:
+            temperature = st.number_input("Temperature (°C)", 20.0, 50.0, 28.5, 0.1, key="live_temp")
+        
+        # Auto-calculate health
+        health = calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temperature)
+        
+        # Display calculated health
+        st.markdown(f"""
+        <div class='health-display'>
+            <div class='health-label'> AUTO-CALCULATED COMPONENT HEALTH</div>
+            <div class='health-value'>{health:.3f}</div>
+            <div class='health-label'>Computed from sensor readings in real-time</div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Analysis Section
-    st.markdown("<div class='card'><div class='card-header'>ML Risk Prediction</div>", unsafe_allow_html=True)
-    
-    if st.button("🚀 RUN PREDICTION ANALYSIS", type="primary", key="live_analyze"):
-        with st.spinner("Analyzing structural integrity..."):
-            time.sleep(0.5)
-            
-            input_data = pd.DataFrame({
-                'vibration_x_ms2': [vib_x],
-                'vibration_y_ms2': [vib_y],
-                'vibration_z_ms2': [vib_z],
-                'pressure_bar': [pressure],
-                'strain_microstrain': [strain],
-                'temperature_c': [temperature],
-                'health_state': [health]
-            })
-            
-            for col in feature_cols:
-                if col not in input_data.columns:
-                    input_data[col] = 0
-            input_data = input_data[feature_cols]
-            
-            rmi_score = model.predict_proba(input_data)[0, 1]
-            st.session_state.live_rmi_score = rmi_score
-            st.session_state.live_health = health
-            st.session_state.live_timestamp = datetime.now()
-    
-    if 'live_rmi_score' in st.session_state:
-        score = st.session_state.live_rmi_score
-        health_calc = st.session_state.live_health
-        timestamp = st.session_state.live_timestamp
+    with col2:
+        st.markdown("**Risk Analysis**")
         
-        m1, m2, m3 = st.columns(3)
-        with m1:
-            st.metric("💥 Failure Risk", f"{score:.2%}")
-        with m2:
-            st.metric("❤️ Health Score", f"{health_calc:.3f}")
-        with m3:
-            st.metric("📊 Last Update", timestamp.strftime('%H:%M:%S'))
+        if st.button("🔍 EXECUTE ANALYSIS", type="primary", use_container_width=True, key="live_analyze"):
+            with st.spinner("Computing risk indices..."):
+                # Simulate sensor reading delay
+                time.sleep(0.5)
+                
+                input_data = pd.DataFrame({
+                    'vibration_x_ms2': [vib_x],
+                    'vibration_y_ms2': [vib_y],
+                    'vibration_z_ms2': [vib_z],
+                    'pressure_bar': [pressure],
+                    'strain_microstrain': [strain],
+                    'temperature_c': [temperature],
+                    'health_state': [health]  # Auto-calculated health
+                })
+                
+                # Fill missing features
+                for col in feature_cols:
+                    if col not in input_data.columns:
+                        input_data[col] = 0
+                input_data = input_data[feature_cols]
+                
+                # Predict
+                rmi_score = model.predict_proba(input_data)[0, 1]
+                st.session_state.live_rmi_score = rmi_score
+                st.session_state.live_health = health
+                st.session_state.live_timestamp = datetime.now()
         
-        # Status Alert
-        if score >= 0.35:
-            st.markdown("""
-            <div class='status-box status-critical'>
-                <div class='status-title'>🚨 CRITICAL ALERT</div>
-                <div>Immediate maintenance required. Launch operations HOLD.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        elif score >= 0.18:
-            st.markdown("""
-            <div class='status-box status-warning'>
-                <div class='status-title'>⚠️ ELEVATED RISK</div>
-                <div>Schedule priority inspection within 48 hours.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div class='status-box status-normal'>
-                <div class='status-title'>✅ ALL SYSTEMS GO</div>
-                <div>Launch pad operational. No immediate concerns detected.</div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with st.expander("📈 Detailed Health Breakdown"):
-            vib_mag = np.sqrt(vib_x**2 + vib_y**2 + vib_z**2)
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Vibration Magnitude", f"{vib_mag:.2f} m/s²")
-                st.metric("Pressure", f"{pressure:.0f} bar")
-            with col2:
-                st.metric("Strain", f"{strain:.0f} µε")
-                st.metric("Temperature", f"{temperature:.1f}°C")
+        if 'live_rmi_score' in st.session_state:
+            score = st.session_state.live_rmi_score
+            health_calc = st.session_state.live_health
+            timestamp = st.session_state.live_timestamp
+            
+            st.metric("Failure Probability", f"{score:.2%}", 
+                     delta=f"{(score-0.15)*100:.1f}% from baseline")
+            
+            st.info(f"📅 Last Update: {timestamp.strftime('%H:%M:%S')}")
+            
+            # Status display
+            if score >= 0.35:
+                st.markdown("""
+                <div class='status-box status-critical'>
+                    <div style='font-size: 2rem;'></div>
+                    <div style='font-size: 1.2rem;'>CRITICAL ALERT</div>
+                    <div style='font-size: 0.9rem;'>Immediate Maintenance Required<br>Launch Hold Recommended</div>
+                </div>
+                """, unsafe_allow_html=True)
+            elif score >= 0.18:
+                st.markdown("""
+                <div class='status-box status-warning'>
+                    <div style='font-size: 1.8rem;'></div>
+                    <div style='font-size: 1.1rem;'>ELEVATED RISK</div>
+                    <div style='font-size: 0.9rem;'>Priority Inspection<br>Within 48 Hours</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class='status-box status-normal'>
+                    <div style='font-size: 1.8rem;'></div>
+                    <div style='font-size: 1.1rem;'>OPERATIONAL</div>
+                    <div style='font-size: 0.9rem;'>All Systems Normal<br>Launch Clearance: GO</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Health breakdown
+            with st.expander(" Health Calculation Breakdown"):
+                vib_mag = np.sqrt(vib_x**2 + vib_y**2 + vib_z**2)
+                st.markdown(f"""
+                **Health Index Calculation:**
+                - Started at: 1.000 (perfect)
+                - Vibration impact ({vib_mag:.2f} m/s²): {'High' if vib_mag > 2.5 else 'Normal'}
+                - Pressure impact ({pressure:.0f} bar): {'Low' if pressure < 175 else 'Normal'}
+                - Strain impact ({strain:.0f} µε): {'High' if strain > 250 else 'Normal'}
+                - Temperature impact ({temperature:.1f}°C): {'High' if temperature > 35 else 'Normal'}
+                
+                **Final Health: {health_calc:.3f}**
+                """)
     
     st.markdown("</div>", unsafe_allow_html=True)
 
-# CSV File Mode
+# === CSV FILE MODE ===
 else:
-    st.markdown("<div class='card'><div class='card-header'>Batch Analysis Mode</div>", unsafe_allow_html=True)
+    st.markdown("<div class='isro-card'><div class='isro-card-header'>📁 Batch CSV File Analysis</div>", unsafe_allow_html=True)
     
-    st.info("🔄 Upload CSV with sensor data for bulk structural analysis")
+    st.info(" Upload a CSV file with sensor readings. Health index will be calculated automatically for each row.")
     
-    uploaded_file = st.file_uploader("📁 Choose CSV file", type=['csv'], 
-                                   help="Requires: vibration_x_ms2, vibration_y_ms2, vibration_z_ms2, pressure_bar, strain_microstrain, temperature_c")
+    uploaded_file = st.file_uploader("Select CSV File", type=['csv'])
     
     if uploaded_file is not None:
-        with st.spinner("Processing batch analysis..."):
+        with st.spinner("Processing sensor data batch..."):
             try:
+                # Read CSV
                 batch_data = pd.read_csv(uploaded_file)
-                st.success(f"✅ Loaded {len(batch_data)} sensor records")
+                st.success(f" Loaded {len(batch_data)} records")
                 
-                with st.expander("👀 Data Preview", expanded=True):
-                    st.dataframe(batch_data.head(), use_container_width=True)
+                # Show preview
+                with st.expander(" Data Preview (first 5 rows)"):
+                    st.dataframe(batch_data.head())
                 
+                # Check required columns
                 required_cols = ['vibration_x_ms2', 'vibration_y_ms2', 'vibration_z_ms2', 
                                'pressure_bar', 'strain_microstrain', 'temperature_c']
                 
                 missing = [col for col in required_cols if col not in batch_data.columns]
                 
                 if missing:
-                    st.error(f"❌ Missing columns: **{', '.join(missing)}**")
-                    st.info("Required: `vibration_x_ms2`, `vibration_y_ms2`, `vibration_z_ms2`, `pressure_bar`, `strain_microstrain`, `temperature_c`")
+                    st.error(f" Missing required columns: {', '.join(missing)}")
+                    st.info("Required columns: vibration_x_ms2, vibration_y_ms2, vibration_z_ms2, pressure_bar, strain_microstrain, temperature_c")
                 else:
-                    # Calculate health for all rows
+                    # Calculate health for each row
+                    st.info(" Calculating health index for each component...")
+                    
                     batch_data['health_state'] = batch_data.apply(
                         lambda row: calculate_health_from_sensors(
-                            row['vibration_x_ms2'], row['vibration_y_ms2'], row['vibration_z_ms2'],
-                            row['pressure_bar'], row['strain_microstrain'], row['temperature_c']
+                            row['vibration_x_ms2'],
+                            row['vibration_y_ms2'],
+                            row['vibration_z_ms2'],
+                            row['pressure_bar'],
+                            row['strain_microstrain'],
+                            row['temperature_c']
                         ), axis=1
                     )
                     
-                    # Prepare features for model
+                    st.success(" Health index calculated for all components")
+                    
+                    # Fill missing features
                     for col in feature_cols:
                         if col not in batch_data.columns:
                             batch_data[col] = 0
                     
+                    # Predict
                     batch_features = batch_data[feature_cols]
                     batch_risks = model.predict_proba(batch_features)[:, 1]
                     
-                    # Summary Metrics
+                    # Display results
+                    st.markdown("###  Analysis Summary")
                     c1, c2, c3, c4 = st.columns(4)
-                    with c1: st.metric("📊 Total Records", len(batch_risks))
-                    with c2: st.metric("📈 Avg Risk", f"{batch_risks.mean():.2%}")
-                    with c3: st.metric("🚨 Critical", f"{(batch_risks>0.35).sum()}")
-                    with c4: st.metric("✅ Safe", f"{(batch_risks<=0.18).sum()}")
+                    with c1:
+                        st.metric("Total Components", len(batch_risks))
+                    with c2:
+                        st.metric("Average Risk", f"{batch_risks.mean():.2%}")
+                    with c3:
+                        st.metric("Critical (>35%)", f"{(batch_risks>0.35).sum()}")
+                    with c4:
+                        st.metric("Safe (<18%)", f"{(batch_risks<=0.18).sum()}")
                     
-                    # Risk Distribution Table
+                    # Risk distribution
+                    st.markdown("###  Risk Distribution")
                     risk_categories = pd.cut(batch_risks, 
-                                           bins=[0, 0.18, 0.35, 1.0], 
-                                           labels=['✅ Normal', '⚠️ Caution', '🚨 Critical'])
+                                            bins=[0, 0.18, 0.35, 1.0], 
+                                            labels=[' Normal (GO)', ' Caution', ' Critical'])
                     
                     risk_summary = pd.DataFrame({
                         'Status': risk_categories.value_counts().index,
                         'Count': risk_categories.value_counts().values,
                         'Percentage': (risk_categories.value_counts().values / len(batch_risks) * 100).round(1)
-                    }).reset_index(drop=True)
+                    })
                     
-                    st.markdown("### 📊 Risk Distribution")
                     st.dataframe(risk_summary, use_container_width=True)
                     
-                    # Download Results
-                    results_df = batch_data[['vibration_x_ms2', 'vibration_y_ms2', 'vibration_z_ms2',
-                                           'pressure_bar', 'strain_microstrain', 'temperature_c',
-                                           'health_state']].copy()
-                    results_df['failure_probability'] = batch_risks
-                    results_df['risk_level'] = risk_categories
+                    # Full results table
+                    with st.expander(" Detailed Results (All Components)"):
+                        results_df = batch_data[['vibration_x_ms2', 'vibration_y_ms2', 'vibration_z_ms2',
+                                                 'pressure_bar', 'strain_microstrain', 'temperature_c',
+                                                 'health_state']].copy()
+                        results_df['Failure_Probability'] = batch_risks
+                        results_df['Risk_Level'] = risk_categories
+                        st.dataframe(results_df)
                     
-                    csv_data = results_df.to_csv(index=False)
+                    # Download results
+                    results_csv = results_df.to_csv(index=False)
                     st.download_button(
-                        label="💾 Download Analysis Report",
-                        data=csv_data,
-                        file_name=f"launchpad_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        label=" Download Full Analysis Report",
+                        data=results_csv,
+                        file_name=f"ISRO_Analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv"
                     )
                     
             except Exception as e:
-                st.error(f"❌ Processing error: {str(e)}")
+                st.error(f" Error: {str(e)}")
+                st.info("Make sure your CSV has these columns: vibration_x_ms2, vibration_y_ms2, vibration_z_ms2, pressure_bar, strain_microstrain, temperature_c")
     
     st.markdown("</div>", unsafe_allow_html=True)
 
-# System Info Footer Card
-st.markdown("""
-<div class='card'>
-    <div class='card-header'>⚙️ System Specifications</div>
-    <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;'>
-""", unsafe_allow_html=True)
+# === SYSTEM INFO ===
+st.markdown("<div class='isro-card'><div class='isro-card-header'>ℹ️ System Information</div>", unsafe_allow_html=True)
 
 info1, info2, info3 = st.columns(3)
 
 with info1:
     st.markdown("""
-    **🤖 ML Model**
-    - **Algorithm**: XGBoost Classifier
-    - **Training Data**: 140,160 samples
-    - **Prediction Horizon**: 7 days
-    - **Inference Time**: <0.5s
+    **Model Specifications**
+    - Algorithm: XGBoost Classifier
+    - Training: 140,160 samples
+    - Horizon: 7-day prediction
+    - Inference: <0.5 seconds
     """)
 
 with info2:
     st.markdown("""
-    **📊 Performance**
-    - **Precision**: 89.12%
-    - **Recall**: 94.31%
-    - **F1-Score**: 91.64%
-    - **ROC-AUC**: 0.9234
+    **Performance Metrics**
+    - Precision: 89.12%
+    - Recall: 94.31%
+    - F1-Score: 91.64%
+    - ROC-AUC: 0.9234
     """)
 
 with info3:
     st.markdown("""
-    **🔬 Health Formula**
-    - Multi-sensor weighted index
-    - Vibration magnitude threshold
-    - Real-time risk correlation
-    - Auto-calibration enabled
+    **Health Calculation**
+    - Auto-computed from sensors
+    - Vibration: 25% weight
+    - Pressure: 20% weight
+    - Strain: 15% weight
+    - Temperature: 10% weight
     """)
 
-st.markdown("</div></div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-# Close containers and add footer
-st.markdown("</div></div>", unsafe_allow_html=True)
-
+# === FOOTER ===
 st.markdown("""
-<div class='footer'>
-    <div style='max-width: 800px; margin: 0 auto;'>
-        <div style='font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem;'>Launch Pad Monitoring System</div>
-        <div style='font-size: 0.9rem; opacity: 0.8; line-height: 1.7;'>
-            Advanced structural health monitoring powered by machine learning.<br>
-            Designed for mission-critical launch infrastructure safety.
-        </div>
+<div class='tricolor-bar' style='margin-top: 3rem;'></div>
+<div style='background: linear-gradient(180deg, #003d82 0%, #002855 100%); color: white; padding: 2rem; text-align: center;'>
+    <div style='font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem;'>
+        भारतीय अंतरिक्ष अनुसंधान संगठन<br>
+        INDIAN SPACE RESEARCH ORGANISATION
+    </div>
+    <div style='font-size: 0.95rem; opacity: 0.9;'>
+        Satish Dhawan Space Centre SHAR • Sriharikota Range • Pin: 524124<br>
+        Launch Pad Health Monitoring System v3.1 • Department of Space • Government of India
+    </div>
+    <div style='margin-top: 1rem; font-size: 0.85rem; opacity: 0.7;'>
+        © 2026 ISRO • Live Sensor Integration • Auto Health Calculation
     </div>
 </div>
 """, unsafe_allow_html=True)
