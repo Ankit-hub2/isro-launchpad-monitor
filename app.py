@@ -7,10 +7,10 @@ import time
 
 # === PAGE CONFIG ===
 st.set_page_config(
-    page_title="ISRO Launch Pad Monitoring System", 
+    page_title="ISRO - Launch Pad Monitoring", 
     page_icon="🛰️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 @st.cache_resource
@@ -21,11 +21,9 @@ def load_isro_system():
 
 model, feature_cols = load_isro_system()
 
-# === HEALTH CALCULATION FUNCTION ===
+# === HEALTH CALCULATION ===
 def calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temp):
-    """Calculate component health from sensor readings"""
     health = 1.0
-    
     vib_mag = np.sqrt(vib_x**2 + vib_y**2 + vib_z**2)
     if vib_mag > 4.0: health -= 0.30
     elif vib_mag > 3.0: health -= 0.20
@@ -52,191 +50,179 @@ def calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temp):
     
     return max(0.50, min(1.0, health))
 
-# === ISRO OFFICIAL STYLING ===
+# === COMPLETE PROFESSIONAL STYLING ===
 st.markdown("""
 <style>
-    /* Global Reset */
-    .main .block-container {
-        padding: 0;
-        max-width: 100%;
-    }
-    
-    /* ISRO Official Header */
-    .isro-header {
-        background: linear-gradient(180deg, #003d82 0%, #002855 100%);
-        padding: 0;
+    /* Global */
+    * {
         margin: 0;
-        color: white;
+        padding: 0;
+        box-sizing: border-box;
     }
     
-    .top-nav {
+    .main .block-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    /* Top Bar */
+    .top-bar {
         background: #00274d;
-        padding: 0.5rem 2rem;
-        font-size: 0.8rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        color: white;
+        padding: 0.5rem 3rem;
+        font-size: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     
-    .top-nav a {
+    .top-links a {
         color: white;
         text-decoration: none;
         margin-right: 1.5rem;
     }
     
+    /* Main Header */
     .main-header {
-        padding: 1.5rem 2rem;
+        background: linear-gradient(180deg, #003d82 0%, #002855 100%);
+        padding: 1.5rem 3rem;
+        color: white;
+    }
+    
+    .header-container {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 2rem;
+        max-width: 1600px;
+        margin: 0 auto;
     }
     
     .header-left {
         display: flex;
         align-items: center;
         gap: 2rem;
-        flex: 1;
-    }
-    
-    .logo-container {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
     }
     
     .isro-logo {
-        width: 80px;
+        width: 85px;
         height: auto;
     }
     
-    .header-text h1 {
-        margin: 0;
-        font-size: 1.1rem;
+    .org-text h1 {
+        font-size: 0.95rem;
         font-weight: 600;
         line-height: 1.4;
+        margin: 0;
     }
     
-    .header-text .hindi {
-        font-size: 0.95rem;
-        opacity: 0.9;
-    }
-    
-    .header-text .subtitle {
-        font-size: 0.85rem;
-        opacity: 0.8;
+    .org-text .subtitle {
+        font-size: 0.8rem;
+        opacity: 0.85;
         margin-top: 0.25rem;
     }
     
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-    }
-    
     .emblem {
-        width: 60px;
+        width: 65px;
         height: auto;
     }
     
     /* Orange Divider */
-    .orange-divider {
+    .tri-divider {
         height: 4px;
-        background: linear-gradient(90deg, #FF9933 0%, #FF9933 33%, #FFFFFF 33%, #FFFFFF 66%, #138808 66%, #138808 100%);
+        background: linear-gradient(90deg, #FF9933 0%, #FF9933 33%, #FFFFFF 33%, #FFFFFF 66%, #138808 66%);
     }
     
-    /* Main Navigation */
-    .main-nav {
+    /* Navigation */
+    .nav-bar {
         background: #004d9f;
-        padding: 0.75rem 2rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding: 0.75rem 3rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .nav-links {
+    .nav-container {
+        max-width: 1600px;
+        margin: 0 auto;
         display: flex;
-        gap: 2rem;
-        font-size: 0.95rem;
+        gap: 2.5rem;
     }
     
-    .nav-links a {
+    .nav-item {
         color: white;
         text-decoration: none;
+        font-size: 0.95rem;
         padding: 0.5rem 0;
         border-bottom: 2px solid transparent;
+        transition: all 0.3s;
     }
     
-    .nav-links a:hover {
+    .nav-item:hover {
         border-bottom-color: #FF9933;
     }
     
     /* Content Area */
-    .content-wrapper {
-        background: #f5f5f5;
-        min-height: calc(100vh - 300px);
+    .content-area {
+        background: #f5f7fa;
+        min-height: 70vh;
+        padding: 2rem 3rem;
     }
     
-    .container {
-        max-width: 1400px;
+    .content-container {
+        max-width: 1600px;
         margin: 0 auto;
-        padding: 2rem;
     }
     
     /* Page Title */
-    .page-title {
+    .page-header {
         background: white;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid #FF9933;
+        border-left: 5px solid #FF9933;
+        padding: 1.75rem 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
-    .page-title h2 {
-        margin: 0;
+    .page-header h2 {
         color: #003d82;
-        font-size: 1.75rem;
+        font-size: 1.85rem;
         font-weight: 700;
+        margin: 0 0 0.5rem 0;
     }
     
-    .page-title p {
-        margin: 0.5rem 0 0 0;
-        color: #666;
+    .page-header p {
+        color: #64748b;
         font-size: 1rem;
+        margin: 0;
     }
     
     /* Cards */
-    .card {
+    .info-card {
         background: white;
-        border: 1px solid #ddd;
-        border-radius: 0;
-        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        padding: 1.75rem;
         margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     
-    .card-header {
-        font-size: 1.2rem;
-        font-weight: 600;
+    .card-title {
         color: #003d82;
+        font-size: 1.15rem;
+        font-weight: 700;
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
-        border-bottom: 2px solid #FF9933;
+        border-bottom: 3px solid #FF9933;
     }
     
-    /* Live Sections */
-    .live-section {
-        background: white;
-        border: 1px solid #ddd;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-    
+    /* Live Badge */
     .live-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
         background: #dc2626;
         color: white;
-        padding: 0.25rem 0.75rem;
+        padding: 0.4rem 1rem;
         font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
     }
     
     .live-dot {
@@ -244,47 +230,64 @@ st.markdown("""
         height: 8px;
         background: white;
         border-radius: 50%;
-        animation: pulse 2s infinite;
+        animation: blink 1.5s infinite;
     }
     
-    @keyframes pulse {
+    @keyframes blink {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.3; }
     }
     
-    .countdown-display {
-        background: #1a1a1a;
-        color: #4ade80;
-        padding: 1.5rem;
+    /* Countdown */
+    .countdown-box {
+        background: #0f172a;
+        padding: 2rem;
         text-align: center;
-        font-family: 'Courier New', monospace;
         margin: 1rem 0;
     }
     
     .countdown-label {
-        font-size: 0.9rem;
-        color: #9ca3af;
-        margin-bottom: 0.5rem;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.5px;
     }
     
     .countdown-time {
-        font-size: 2.5rem;
+        color: #4ade80;
+        font-size: 2.75rem;
         font-weight: 700;
-        letter-spacing: 2px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 3px;
     }
     
+    .countdown-info {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-top: 1rem;
+        line-height: 1.6;
+    }
+    
+    /* News Items */
     .news-item {
-        padding: 0.75rem;
-        border-left: 3px solid #003d82;
+        padding: 1rem;
+        border-left: 4px solid #003d82;
         background: #f8fafc;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+    }
+    
+    .news-item:hover {
+        background: #f1f5f9;
+        border-left-color: #FF9933;
     }
     
     .news-title {
         color: #003d82;
         font-weight: 600;
         font-size: 0.95rem;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.4rem;
+        line-height: 1.4;
     }
     
     .news-time {
@@ -292,12 +295,28 @@ st.markdown("""
         font-size: 0.8rem;
     }
     
-    /* Status Indicators */
-    .status-indicator {
-        padding: 1rem;
-        border-radius: 0;
-        border-left: 4px solid;
+    /* Video Container */
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%;
+        background: #000;
         margin: 1rem 0;
+    }
+    
+    .video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Status Boxes */
+    .status-box {
+        padding: 1.25rem;
+        border-left: 5px solid;
+        margin: 1.25rem 0;
     }
     
     .status-critical {
@@ -320,32 +339,33 @@ st.markdown("""
     
     .status-title {
         font-weight: 700;
-        font-size: 1rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.05rem;
+        margin-bottom: 0.4rem;
     }
     
     /* Health Display */
-    .health-box {
-        background: #f1f5f9;
+    .health-display {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
         border: 2px solid #cbd5e1;
-        padding: 1.5rem;
+        padding: 2rem;
         text-align: center;
-        margin: 1rem 0;
-    }
-    
-    .health-value {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0.5rem 0;
-        font-family: 'Courier New', monospace;
+        margin: 1.25rem 0;
     }
     
     .health-label {
-        font-size: 0.8rem;
         color: #475569;
-        text-transform: uppercase;
+        font-size: 0.8rem;
+        font-weight: 600;
         letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    
+    .health-value {
+        color: #0f172a;
+        font-size: 3rem;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+        margin: 0.75rem 0;
     }
     
     /* Buttons */
@@ -353,68 +373,102 @@ st.markdown("""
         background: #003d82 !important;
         color: white !important;
         border: none !important;
-        border-radius: 0 !important;
-        padding: 0.75rem 2rem !important;
+        padding: 0.875rem 2.5rem !important;
         font-weight: 600 !important;
-        width: 100%;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        width: 100% !important;
+        transition: all 0.3s !important;
     }
     
     .stButton > button:hover {
         background: #002855 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,61,130,0.3) !important;
+    }
+    
+    /* Form Elements */
+    .stNumberInput label {
+        color: #334155 !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .stNumberInput input {
+        border-color: #cbd5e1 !important;
+        font-size: 0.95rem !important;
+    }
+    
+    /* Radio Buttons */
+    .stRadio > div {
+        gap: 1rem;
+    }
+    
+    .stRadio label {
+        background: white;
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e2e8f0;
+        font-weight: 500;
+    }
+    
+    /* Metrics */
+    [data-testid="stMetricValue"] {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #003d82;
     }
     
     /* Footer */
     .isro-footer {
         background: linear-gradient(180deg, #003d82 0%, #001a3d 100%);
         color: white;
-        padding: 2rem;
-        text-align: center;
+        padding: 2.5rem 3rem;
         margin-top: 3rem;
     }
     
     .footer-content {
-        max-width: 1400px;
+        max-width: 1600px;
         margin: 0 auto;
+        text-align: center;
     }
     
     .footer-title {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 1rem;
-    }
-    
-    .footer-text {
-        font-size: 0.9rem;
-        opacity: 0.9;
         line-height: 1.6;
     }
     
-    /* Mobile Responsive */
+    .footer-info {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        line-height: 1.8;
+    }
+    
+    /* Hide Streamlit */
+    #MainMenu, footer, .stDeployButton {visibility: hidden;}
+    
+    /* Responsive */
     @media (max-width: 768px) {
+        .top-bar, .nav-bar, .content-area {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
         .main-header {
-            flex-direction: column;
-            text-align: center;
             padding: 1rem;
         }
         
-        .header-left, .header-right {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .logo-container {
+        .header-container {
             flex-direction: column;
-        }
-        
-        .nav-links {
-            flex-wrap: wrap;
+            text-align: center;
             gap: 1rem;
         }
         
-        .container {
-            padding: 1rem;
+        .nav-container {
+            flex-direction: column;
+            gap: 0.5rem;
         }
         
         .countdown-time {
@@ -422,110 +476,101 @@ st.markdown("""
         }
         
         .isro-logo, .emblem {
-            width: 50px;
+            width: 55px;
         }
     }
-    
-    /* Hide Streamlit elements */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stDeployButton {display: none;}
 </style>
 
-<!-- ISRO Header -->
-<div class='isro-header'>
-    <div class='top-nav'>
+<!-- Top Bar -->
+<div class='top-bar'>
+    <div class='top-links'>
         <a href='#'>English</a>
         <a href='#'>हिंदी</a>
         <a href='#'>Sitemap</a>
         <a href='#'>Contact Us</a>
         <a href='#'>Feedback</a>
     </div>
-    
-    <div class='main-header'>
+    <div>A+ A A-</div>
+</div>
+
+<!-- Main Header -->
+<div class='main-header'>
+    <div class='header-container'>
         <div class='header-left'>
-            <div class='logo-container'>
-                <img src='https://www.isro.gov.in/media/image/index.php?img_id=logo_1' class='isro-logo' alt='ISRO'>
-                <div class='header-text'>
-                    <div class='hindi'>भारतीय अंतरिक्ष अनुसंधान संगठन, अंतरिक्ष विभाग</div>
-                    <h1>Indian Space Research Organisation, Department of Space</h1>
-                    <div class='subtitle'>भारत सरकार / Government of India</div>
-                </div>
+            <img src='https://www.isro.gov.in/media/image/index.php?img_id=logo_1' class='isro-logo' alt='ISRO'>
+            <div class='org-text'>
+                <h1>भारतीय अंतरिक्ष अनुसंधान संगठन, अंतरिक्ष विभाग<br>
+                Indian Space Research Organisation, Department of Space</h1>
+                <div class='subtitle'>भारत सरकार / Government of India</div>
             </div>
         </div>
-        <div class='header-right'>
-            <img src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg' class='emblem' alt='India Emblem'>
-        </div>
+        <img src='https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg' class='emblem' alt='Emblem'>
     </div>
 </div>
 
-<div class='orange-divider'></div>
+<div class='tri-divider'></div>
 
-<div class='main-nav'>
-    <div class='nav-links'>
-        <a href='#'>Home</a>
-        <a href='#'>About</a>
-        <a href='#'>Missions</a>
-        <a href='#'>Launches</a>
-        <a href='#'>Centres</a>
-        <a href='#'>Monitoring</a>
+<!-- Navigation -->
+<div class='nav-bar'>
+    <div class='nav-container'>
+        <a href='#' class='nav-item'>Home</a>
+        <a href='#' class='nav-item'>About</a>
+        <a href='#' class='nav-item'>Missions</a>
+        <a href='#' class='nav-item'>Launches</a>
+        <a href='#' class='nav-item'>Centres</a>
+        <a href='#' class='nav-item'>Monitoring</a>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # === CONTENT AREA ===
-st.markdown("<div class='content-wrapper'><div class='container'>", unsafe_allow_html=True)
+st.markdown("<div class='content-area'><div class='content-container'>", unsafe_allow_html=True)
 
-# Page Title
+# Page Header
 st.markdown("""
-<div class='page-title'>
+<div class='page-header'>
     <h2>Launch Pad Structural Health Monitoring System</h2>
     <p>Satish Dhawan Space Centre SHAR, Sriharikota • Real-time Predictive Maintenance Platform</p>
 </div>
 """, unsafe_allow_html=True)
 
-# === LIVE MISSION SECTION ===
-col_live1, col_live2 = st.columns([2, 1])
+# Live Section
+col_main, col_side = st.columns([2.5, 1.5])
 
-with col_live1:
+with col_main:
     st.markdown("""
-    <div class='live-section'>
+    <div class='info-card'>
         <div class='live-badge'>
             <div class='live-dot'></div>
             LIVE
         </div>
-        <div style='margin-top: 1rem;'>
-            <iframe width='100%' height='315' 
-            src='https://www.youtube.com/embed/live_stream?channel=UCHh4YMD3L03gRKSeuK3sJWQ' 
+        <div class='video-wrapper'>
+            <iframe src='https://www.youtube.com/embed/21X5lGlDOfg?autoplay=1&mute=1' 
             frameborder='0' allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture' 
             allowfullscreen></iframe>
         </div>
-        <div style='margin-top: 0.75rem; color: #666; font-size: 0.9rem;'>
+        <div style='margin-top: 1rem; color: #64748b; font-size: 0.9rem;'>
             <strong>ISRO Official Live Stream</strong> - Launch Operations & Mission Updates
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-with col_live2:
-    # Countdown
+with col_side:
     st.markdown("""
-    <div class='card'>
-        <div class='card-header'>Next Launch Countdown</div>
-        <div class='countdown-display'>
+    <div class='info-card'>
+        <div class='card-title'>Next Launch Countdown</div>
+        <div class='countdown-box'>
             <div class='countdown-label'>PSLV-C62 / EOS-N1 Mission</div>
             <div class='countdown-time'>+00:00:05:570</div>
-        </div>
-        <div style='text-align: center; color: #666; font-size: 0.85rem; margin-top: 0.5rem;'>
-            Launch Vehicle: PSLV-C62<br>
-            Launch Site: First Launch Pad
+            <div class='countdown-info'>
+                Launch Vehicle: PSLV-C62<br>
+                Launch Site: First Launch Pad
+            </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
     
-    # Live News
-    st.markdown("""
-    <div class='card'>
-        <div class='card-header'>Latest Updates</div>
+    <div class='info-card'>
+        <div class='card-title'>Latest Updates</div>
         <div class='news-item'>
             <div class='news-title'>LVM3-M6 mission successfully places BlueBird Block-2 satellite</div>
             <div class='news-time'>2 hours ago</div>
@@ -541,223 +586,146 @@ with col_live2:
     </div>
     """, unsafe_allow_html=True)
 
-# === DATA SOURCE SELECTION ===
-st.markdown("<div class='card'><div class='card-header'>Data Source Configuration</div>", unsafe_allow_html=True)
-data_source = st.radio(
-    "Select Input Method:",
-    ["Live Sensor Feed", "CSV File Upload"],
-    label_visibility="collapsed"
-)
+# Data Source Selection
+st.markdown("<div class='info-card'><div class='card-title'>Data Source Configuration</div>", unsafe_allow_html=True)
+data_source = st.radio("", ["Live Sensor Feed", "CSV File Upload"], label_visibility="collapsed")
 st.markdown("</div>", unsafe_allow_html=True)
 
-# === LIVE SENSOR MODE ===
+# Live Sensor Mode
 if data_source == "Live Sensor Feed":
-    # Input Section
-    st.markdown("<div class='card'><div class='card-header'>Sensor Input Parameters</div>", unsafe_allow_html=True)
+    st.markdown("<div class='info-card'><div class='card-title'>Sensor Input Parameters</div>", unsafe_allow_html=True)
     
     st.subheader("Vibration Sensors (Tri-axial Accelerometers)")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        vib_x = st.number_input("X-axis (m/s²)", 0.0, 5.0, 0.72, 0.01, key="vx")
-    with col2:
-        vib_y = st.number_input("Y-axis (m/s²)", 0.0, 5.0, 0.68, 0.01, key="vy")
-    with col3:
-        vib_z = st.number_input("Z-axis (m/s²)", 0.0, 4.0, 0.61, 0.01, key="vz")
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        vib_x = st.number_input("X-axis (m/s²)", 0.0, 5.0, 0.72, 0.01)
+    with c2:
+        vib_y = st.number_input("Y-axis (m/s²)", 0.0, 5.0, 0.68, 0.01)
+    with c3:
+        vib_z = st.number_input("Z-axis (m/s²)", 0.0, 4.0, 0.61, 0.01)
     
     st.subheader("Additional Monitoring Systems")
-    col4, col5, col6 = st.columns(3)
-    with col4:
-        pressure = st.number_input("Hydraulic Pressure (bar)", 120.0, 260.0, 202.0, 1.0, key="pr")
-    with col5:
-        strain = st.number_input("Structural Strain (µε)", 40.0, 450.0, 88.0, 2.0, key="st")
-    with col6:
-        temperature = st.number_input("Temperature (°C)", 20.0, 50.0, 28.5, 0.1, key="tp")
+    c4, c5, c6 = st.columns(3)
+    with c4:
+        pressure = st.number_input("Hydraulic Pressure (bar)", 120.0, 260.0, 202.0, 1.0)
+    with c5:
+        strain = st.number_input("Structural Strain (µε)", 40.0, 450.0, 88.0, 2.0)
+    with c6:
+        temperature = st.number_input("Temperature (°C)", 20.0, 50.0, 28.5, 0.1)
     
     health = calculate_health_from_sensors(vib_x, vib_y, vib_z, pressure, strain, temperature)
     
     st.markdown(f"""
-    <div class='health-box'>
+    <div class='health-display'>
         <div class='health-label'>Component Health Index</div>
         <div class='health-value'>{health:.3f}</div>
         <div class='health-label'>Auto-calculated from sensor readings</div>
     </div>
     """, unsafe_allow_html=True)
-    
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # Analysis
-    st.markdown("<div class='card'><div class='card-header'>Risk Analysis</div>", unsafe_allow_html=True)
+    st.markdown("<div class='info-card'><div class='card-title'>Risk Analysis</div>", unsafe_allow_html=True)
     
-    if st.button("Execute Analysis", type="primary", key="analyze"):
-        with st.spinner("Processing sensor data..."):
+    if st.button("Execute Analysis"):
+        with st.spinner("Processing..."):
             time.sleep(0.5)
             
             input_data = pd.DataFrame({
-                'vibration_x_ms2': [vib_x],
-                'vibration_y_ms2': [vib_y],
-                'vibration_z_ms2': [vib_z],
-                'pressure_bar': [pressure],
-                'strain_microstrain': [strain],
-                'temperature_c': [temperature],
+                'vibration_x_ms2': [vib_x], 'vibration_y_ms2': [vib_y], 'vibration_z_ms2': [vib_z],
+                'pressure_bar': [pressure], 'strain_microstrain': [strain], 'temperature_c': [temperature],
                 'health_state': [health]
             })
             
             for col in feature_cols:
                 if col not in input_data.columns:
                     input_data[col] = 0
-            input_data = input_data[feature_cols]
             
-            rmi_score = model.predict_proba(input_data)[0, 1]
+            rmi_score = model.predict_proba(input_data[feature_cols])[0, 1]
             st.session_state.rmi = rmi_score
-            st.session_state.health = health
             st.session_state.timestamp = datetime.now()
     
     if 'rmi' in st.session_state:
         score = st.session_state.rmi
         timestamp = st.session_state.timestamp
         
-        col_m1, col_m2, col_m3 = st.columns(3)
-        with col_m1:
+        cm1, cm2, cm3 = st.columns(3)
+        with cm1:
             st.metric("Failure Probability", f"{score:.2%}")
-        with col_m2:
+        with cm2:
             st.metric("Health Index", f"{health:.3f}")
-        with col_m3:
-            st.metric("Last Updated", timestamp.strftime('%H:%M:%S'))
+        with cm3:
+            st.metric("Updated", timestamp.strftime('%H:%M:%S'))
         
         if score >= 0.35:
-            st.markdown("""
-            <div class='status-indicator status-critical'>
-                <div class='status-title'>CRITICAL ALERT</div>
-                <div>Immediate maintenance required. Launch hold recommended.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<div class='status-box status-critical'><div class='status-title'>CRITICAL ALERT</div>Immediate maintenance required. Launch hold recommended.</div>", unsafe_allow_html=True)
         elif score >= 0.18:
-            st.markdown("""
-            <div class='status-indicator status-warning'>
-                <div class='status-title'>ELEVATED RISK</div>
-                <div>Priority inspection required within 48 hours.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<div class='status-box status-warning'><div class='status-title'>ELEVATED RISK</div>Priority inspection required within 48 hours.</div>", unsafe_allow_html=True)
         else:
-            st.markdown("""
-            <div class='status-indicator status-normal'>
-                <div class='status-title'>OPERATIONAL</div>
-                <div>All systems normal. Launch clearance: GO</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("<div class='status-box status-normal'><div class='status-title'>OPERATIONAL</div>All systems normal. Launch clearance: GO</div>", unsafe_allow_html=True)
     
     st.markdown("</div>", unsafe_allow_html=True)
 
-# === CSV MODE ===
 else:
-    st.markdown("<div class='card'><div class='card-header'>Batch Analysis - CSV Upload</div>", unsafe_allow_html=True)
+    st.markdown("<div class='info-card'><div class='card-title'>Batch Analysis - CSV Upload</div>", unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("Upload CSV", type=['csv'], label_visibility="collapsed")
     
-    st.info("Upload CSV file containing sensor readings for batch processing")
-    
-    uploaded_file = st.file_uploader("Select CSV File", type=['csv'], label_visibility="collapsed")
-    
-    if uploaded_file is not None:
-        with st.spinner("Processing batch data..."):
-            try:
-                batch_data = pd.read_csv(uploaded_file)
-                st.success(f"Loaded {len(batch_data)} records successfully")
+    if uploaded_file:
+        try:
+            batch_data = pd.read_csv(uploaded_file)
+            required_cols = ['vibration_x_ms2', 'vibration_y_ms2', 'vibration_z_ms2', 'pressure_bar', 'strain_microstrain', 'temperature_c']
+            
+            if all(col in batch_data.columns for col in required_cols):
+                batch_data['health_state'] = batch_data.apply(
+                    lambda row: calculate_health_from_sensors(row['vibration_x_ms2'], row['vibration_y_ms2'], 
+                    row['vibration_z_ms2'], row['pressure_bar'], row['strain_microstrain'], row['temperature_c']), axis=1)
                 
-                required_cols = ['vibration_x_ms2', 'vibration_y_ms2', 'vibration_z_ms2', 
-                               'pressure_bar', 'strain_microstrain', 'temperature_c']
+                for col in feature_cols:
+                    if col not in batch_data.columns:
+                        batch_data[col] = 0
                 
-                missing = [col for col in required_cols if col not in batch_data.columns]
+                batch_risks = model.predict_proba(batch_data[feature_cols])[:, 1]
                 
-                if missing:
-                    st.error(f"Missing columns: {', '.join(missing)}")
-                else:
-                    batch_data['health_state'] = batch_data.apply(
-                        lambda row: calculate_health_from_sensors(
-                            row['vibration_x_ms2'], row['vibration_y_ms2'], row['vibration_z_ms2'],
-                            row['pressure_bar'], row['strain_microstrain'], row['temperature_c']
-                        ), axis=1
-                    )
-                    
-                    for col in feature_cols:
-                        if col not in batch_data.columns:
-                            batch_data[col] = 0
-                    
-                    batch_features = batch_data[feature_cols]
-                    batch_risks = model.predict_proba(batch_features)[:, 1]
-                    
-                    c1, c2, c3, c4 = st.columns(4)
-                    with c1:
-                        st.metric("Total Components", len(batch_risks))
-                    with c2:
-                        st.metric("Average Risk", f"{batch_risks.mean():.1%}")
-                    with c3:
-                        st.metric("Critical", f"{(batch_risks>0.35).sum()}")
-                    with c4:
-                        st.metric("Safe", f"{(batch_risks<=0.18).sum()}")
-                    
-                    results_df = batch_data[required_cols + ['health_state']].copy()
-                    results_df['failure_probability'] = batch_risks
-                    
-                    st.dataframe(results_df, use_container_width=True)
-                    
-                    results_csv = results_df.to_csv(index=False)
-                    st.download_button(
-                        label="Download Analysis Report",
-                        data=results_csv,
-                        file_name=f"ISRO_Analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
-                    
-            except Exception as e:
-                st.error(f"Error: {str(e)}")
+                cb1, cb2, cb3, cb4 = st.columns(4)
+                with cb1:
+                    st.metric("Total", len(batch_risks))
+                with cb2:
+                    st.metric("Avg Risk", f"{batch_risks.mean():.1%}")
+                with cb3:
+                    st.metric("Critical", (batch_risks>0.35).sum())
+                with cb4:
+                    st.metric("Safe", (batch_risks<=0.18).sum())
+                
+                results_df = batch_data[required_cols + ['health_state']].copy()
+                results_df['failure_probability'] = batch_risks
+                st.dataframe(results_df, use_container_width=True)
+                
+                st.download_button("Download Report", results_df.to_csv(index=False),
+                    f"ISRO_Analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv", "text/csv")
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
     
     st.markdown("</div>", unsafe_allow_html=True)
 
-# === SYSTEM INFO ===
-st.markdown("<div class='card'><div class='card-header'>System Information</div>", unsafe_allow_html=True)
-
-info1, info2, info3 = st.columns(3)
-
-with info1:
-    st.markdown("""
-    **Model Specifications**
-    - Algorithm: XGBoost Classifier
-    - Training Samples: 140,160
-    - Prediction Horizon: 7 days
-    - Inference Time: <0.5 seconds
-    """)
-
-with info2:
-    st.markdown("""
-    **Performance Metrics**
-    - Precision: 89.12%
-    - Recall: 94.31%
-    - F1-Score: 91.64%
-    - ROC-AUC: 0.9234
-    """)
-
-with info3:
-    st.markdown("""
-    **Health Calculation Weights**
-    - Vibration Impact: 25%
-    - Pressure Impact: 20%
-    - Strain Impact: 15%
-    - Temperature Impact: 10%
-    """)
-
+# System Info
+st.markdown("<div class='info-card'><div class='card-title'>System Information</div>", unsafe_allow_html=True)
+i1, i2, i3 = st.columns(3)
+with i1:
+    st.markdown("**Model Specs**\n- XGBoost Classifier\n- 140,160 samples\n- 7-day horizon\n- <0.5s inference")
+with i2:
+    st.markdown("**Performance**\n- Precision: 89.12%\n- Recall: 94.31%\n- F1: 91.64%\n- AUC: 0.9234")
+with i3:
+    st.markdown("**Health Weights**\n- Vibration: 25%\n- Pressure: 20%\n- Strain: 15%\n- Temp: 10%")
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("</div></div>", unsafe_allow_html=True)
 
-# === FOOTER ===
+# Footer
 st.markdown("""
-<div class='orange-divider'></div>
+<div class='tri-divider'></div>
 <div class='isro-footer'>
     <div class='footer-content'>
-        <div class='footer-title'>
-            भारतीय अंतरिक्ष अनुसंधान संगठन<br>
-            INDIAN SPACE RESEARCH ORGANISATION
-        </div>
-        <div class='footer-text'>
+        <div class='footer-title'>भारतीय अंतरिक्ष अनुसंधान संगठन<br>INDIAN SPACE RESEARCH ORGANISATION</div>
+        <div class='footer-info'>
             Satish Dhawan Space Centre SHAR • Sriharikota Range • Andhra Pradesh • Pin: 524124<br>
             Launch Pad Health Monitoring System v3.1 • Department of Space • Government of India<br>
             © 2026 ISRO • All Rights Reserved
