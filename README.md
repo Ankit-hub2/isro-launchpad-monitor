@@ -1,1 +1,1 @@
-🚀 ISRO Launch Pad Monitor - 95% accuracy
+ISRO Launch Pad Monitor is an AI-powered system designed to detect potential risks on a rocket launch pad in real time. By combining computer vision with environmental sensor data, it identifies smoke, temperature anomalies, gas leaks, vibrations, and unauthorized movement with up to 95% accuracy in controlled testing. The goal of this project is to enhance launch safety through intelligent, automated monitoring.
